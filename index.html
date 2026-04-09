@@ -618,10 +618,21 @@ function Nav({onContact,isAdmin,onAdmin}){
       <nav>
         <div className="nav-logo" onClick={()=>isAdmin&&fileRef.current.click()} title={isAdmin?'Haz clic para cambiar el logo':''}>
           <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleLogo}/>
-          {logo
-            ? <img src={logo} alt="Logo" style={{width:38,height:38,objectFit:'contain'}}/>
-            : <DualCoreSVG size={38}/>
-          }
+          {logo || 'dualcore.jpeg' 
+  ? <img 
+      src={logo || 'dualcore.jpeg'} 
+      alt="Logo" 
+      style={{
+        width: 40, 
+        height: 40, 
+        objectFit: 'cover', 
+        backgroundColor: '#0a0f1e', 
+        borderRadius: '50%', 
+        border: '2px solid #f1f5f9'
+      }}
+    />
+  : <DualCoreSVG size={40}/>
+}
           <span className="nav-brand">Dual<span>Core</span> Studio</span>
         </div>
         <ul className="nav-links">
