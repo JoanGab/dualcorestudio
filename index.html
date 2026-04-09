@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DualCore Studio — Ingeniería Sin Límites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0f1e;
+    --card: #161f38;
+    --card2: #0f172a;
+    --neon: #00e5b0;
+    --neon2: #00c4f4;
+    --neon-dim: rgba(0,229,176,0.12);
+    --neon2-dim: rgba(0,196,244,0.10);
+    --text: #e2e8f0;
+    --muted: #7a8aaa;
+    --border: rgba(0,229,176,0.15);
+    --border2: rgba(0,196,244,0.12);
+    --font-title: 'Sora', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-title);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,176,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,176,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #root { position: relative; z-index: 1; }
+
+  /* Glow orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    opacity: 0.25;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 6vw;
+    background: rgba(10,15,30,0.75);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo-img-wrap {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Logo upload target */
+  .logo-upload-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+  }
+
+  .logo-upload-label img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .logo-placeholder {
+    width: 44px;
+    height: 44px;
+    border: 1.5px dashed var(--neon);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--neon);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-align: center;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 4px;
+  }
+
+  .logo-placeholder:hover { background: var(--neon-dim); }
+
+  .nav-brand {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-brand span { color: var(--neon); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--neon); }
+
+  .nav-cta {
+    background: var(--neon);
+    color: #0a0f1e !important;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600 !important;
+    font-family: var(--font-title) !important;
+    font-size: 0.82rem !important;
+    transition: all 0.2s !important;
+    letter-spacing: 0 !important;
+  }
+
+  .nav-cta:hover {
+    background: #00ffc8 !important;
+    box-shadow: 0 0 24px rgba(0,229,176,0.5) !important;
+    color: #0a0f1e !important;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 6vw 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--neon-dim);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--neon);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.8s ease both;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: 0 0 8px var(--neon);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero h1 {
+    font-family: var(--font-title);
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -2px;
+    color: #fff;
+    max-width: 900px;
+    animation: fadeSlideDown 0.9s ease 0.1s both;
+  }
+
+  .hero h1 .neon { color: var(--neon); }
+  .hero h1 .blue { color: var(--neon2); }
+
+  .hero-sub {
+    margin-top: 24px;
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    max-width: 600px;
+    line-height: 1.7;
+    animation: fadeSlideDown 1s ease 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeSlideDown 1.1s ease 0.3s both;
+  }
+
+  .btn-primary {
+    background: var(--neon);
+    color: #0a0f1e;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-title);
+  }
+
+  .btn-primary:hover {
+    background: #00ffc8;
+    box-shadow: 0 0 40px rgba(0,229,176,0.5), 0 8px 32px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-title);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--neon2);
+    color: var(--neon2);
+    box-shadow: 0 0 24px rgba(0,196,244,0.15);
+    transform: translateY(-2px);
+  }
+
+  .hero-stack {
+    margin-top: 64px;
+    animation: fadeSlideDown 1.2s ease 0.4s both;
+  }
+
+  .stack-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .stack-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--neon);
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+
+  .stack-pill:hover {
+    background: var(--neon-dim);
+    border-color: var(--neon);
+    box-shadow: 0 0 16px rgba(0,229,176,0.2);
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTIONS COMMON */
+  section {
+    padding: 100px 6vw;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--neon);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 40px;
+    background: var(--neon);
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  /* SERVICES */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 56px;
+  }
+
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .service-card:hover { 
+    transform: translateY(-6px);
+    border-color: rgba(0,229,176,0.3);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 40px rgba(0,229,176,0.08);
+  }
+
+  .service-card:hover::before { opacity: 1; }
+
+  .service-icon {
+    width: 52px; height: 52px;
+    background: var(--neon-dim);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .service-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .service-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  .service-tag {
+    margin-top: 20px;
+    display: inline-block;
+    background: var(--neon-dim);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--neon);
+    letter-spacing: 0.5px;
+  }
+
+  /* LOANPRO */
+  .loanpro-section {
+    background: linear-gradient(135deg, rgba(22,31,56,0.6) 0%, rgba(10,15,30,0.95) 100%);
+  }
+
+  .loanpro-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .loanpro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,196,244,0.1);
+    border: 1px solid rgba(0,196,244,0.25);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--neon2);
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+  }
+
+  .loanpro-title {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: #fff;
+    margin-bottom: 18px;
+  }
+
+  .loanpro-title span { color: var(--neon2); }
+
+  .loanpro-desc {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .loanpro-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+
+  .feature-row .dot {
+    width: 7px; height: 7px;
+    background: var(--neon);
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px var(--neon);
+  }
+
+  .loanpro-card {
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loanpro-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: var(--neon2);
+    opacity: 0.06;
+    filter: blur(40px);
+  }
+
+  .lp-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .lp-stat {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .lp-stat-val {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon2);
+    display: block;
+  }
+
+  .lp-stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .lp-tech-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lp-tech {
+    background: var(--neon2-dim);
+    border: 1px solid rgba(0,196,244,0.2);
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--neon2);
+  }
+
+  /* TEAM */
+  .team-section { background: var(--bg); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+    max-width: 760px;
+  }
+
+  .team-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+
+  .team-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,229,176,0.35);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 32px rgba(0,229,176,0.06);
+  }
+
+  .team-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon), var(--neon2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #0a0f1e;
+    margin-bottom: 16px;
+  }
+
+  .team-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .team-role {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--neon);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .team-bio {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* CONTACT */
+  .contact-section {
+    background: linear-gradient(180deg, var(--bg) 0%, rgba(22,31,56,0.4) 100%);
+  }
+
+  .contact-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .contact-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .contact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  }
+
+  .contact-card.instagram:hover {
+    border-color: #e1306c;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(225,48,108,0.15);
+  }
+
+  .contact-card.whatsapp:hover {
+    border-color: #25d366;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(37,211,102,0.15);
+  }
+
+  .contact-card.email:hover {
+    border-color: var(--neon2);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,196,244,0.15);
+  }
+
+  .contact-card.website:hover {
+    border-color: var(--neon);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,229,176,0.15);
+  }
+
+  .contact-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .contact-icon.ig { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+  .contact-icon.wa { background: #25d366; }
+  .contact-icon.em { background: rgba(0,196,244,0.15); border: 1px solid rgba(0,196,244,0.3); }
+  .contact-icon.wb { background: var(--neon-dim); border: 1px solid var(--border); }
+
+  .contact-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .contact-value {
+    font-size: 0.88rem;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .contact-card.instagram .contact-value { color: #f96ba0; }
+  .contact-card.whatsapp .contact-value { color: #4ade80; }
+  .contact-card.email .contact-value { color: var(--neon2); font-size: 0.8rem; }
+  .contact-card.website .contact-value { color: var(--neon); font-size: 0.78rem; word-break: break-all; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 6vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-left {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .footer-left span { color: var(--neon); }
+
+  .footer-right {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* MOBILE NAV */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 6px;
+    background: none;
+    border: none;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 73px; left: 0; right: 0;
+    background: rgba(10,15,30,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 6vw;
+    z-index: 99;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .mobile-menu.open { display: flex; }
+
+  .mobile-menu a {
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+
+  .mobile-menu a:hover { color: var(--neon); }
+
+  /* DIVIDER */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .loanpro-inner { grid-template-columns: 1fr; gap: 40px; }
+    .team-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .contact-cards { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 700px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .contact-cards { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; text-align: center; }
+  }
+
+  @media (max-width: 480px) {
+    .contact-cards { grid-template-columns: 1fr; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+    .lp-stat-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Animations on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ---- Reveal hook ---- */
+function useReveal() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { el.classList.add('visible'); obs.disconnect(); }
+    }, { threshold: 0.12 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
+}
+
+/* ---- NAV ---- */
+function Nav({ onContactClick }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [logo, setLogo] = useState(null);
+  const fileRef = useRef();
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => setLogo(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <>
+      <nav>
+        <a className="nav-logo" href="#hero">
+          <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleFile}/>
+          <div className="logo-upload-label" title="Haz clic para subir tu logo" onClick={e=>{e.preventDefault();fileRef.current.click();}}>
+            {logo
+              ? <img src={logo} alt="DualCore Studio logo" style={{width:44,height:44,objectFit:'contain'}}/>
+              : <div className="logo-placeholder">+ Logo</div>
+            }
+          </div>
+          <span className="nav-brand">Dual<span>Core</span> Studio</span>
+        </a>
+        <ul className="nav-links">
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#loanpro">Proyectos</a></li>
+          <li><a href="#equipo">Equipo</a></li>
+          <li><a href="#contacto" onClick={e=>{e.preventDefault();onContactClick();}} className="nav-cta">Contacto</a></li>
+        </ul>
+        <button className="hamburger" onClick={()=>setMenuOpen(o=>!o)} aria-label="Menú">
+          <span/><span/><span/>
+        </button>
+      </nav>
+      <div className={`mobile-menu${menuOpen?' open':''}`}>
+        <a href="#servicios" onClick={()=>setMenuOpen(false)}>Servicios</a>
+        <a href="#loanpro" onClick={()=>setMenuOpen(false)}>Proyectos</a>
+        <a href="#equipo" onClick={()=>setMenuOpen(false)}>Equipo</a>
+        <a href="#contacto" onClick={e=>{e.preventDefault();setMenuOpen(false);onContactClick();}}>Contacto</a>
+      </div>
+    </>
+  );
+}
+
+/* ---- HERO ---- */
+const STACK = ['Flutter','Spring Boot','React','Node.js','Python','Firebase','MySQL','Java'];
+
+function Hero({ onContactClick }) {
+  return (
+    <section id="hero" className="hero">
+      {/* orbs */}
+      <div className="orb" style={{width:600,height:600,background:'#00e5b0',top:-200,left:-200,position:'absolute'}}/>
+      <div className="orb" style={{width:500,height:500,background:'#00c4f4',bottom:-150,right:-150,position:'absolute'}}/>
+
+      <div className="hero-badge">INGENIERÍA DE ALTO RENDIMIENTO</div>
+      <h1>
+        <span className="neon">DualCore Studio:</span><br/>
+        Ingeniería de Software<br/>
+        <span className="blue">sin límites</span>
+      </h1>
+      <p className="hero-sub">
+        Si puedes imaginarlo, podemos desarrollarlo. Desde una landing page elegante hasta sistemas empresariales complejos — cubrimos cada capa del stack.
+      </p>
+      <div className="hero-actions">
+        <a href="#contacto" className="btn-primary" onClick={e=>{e.preventDefault();onContactClick();}}>
+          🚀 Iniciar Proyecto
+        </a>
+        <a href="#loanpro" className="btn-secondary">
+          Ver Proyectos →
+        </a>
+      </div>
+      <div className="hero-stack">
+        <p className="stack-label">// Stack tecnológico</p>
+        <div className="stack-pills">
+          {STACK.map(s => <span key={s} className="stack-pill">{s}</span>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---- SERVICES ---- */
+const SERVICES = [
+  { icon:'🌐', title:'Desarrollo Web', desc:'Aplicaciones web modernas, SPAs, dashboards y sistemas administrativos. Desde un sitio corporativo hasta plataformas SaaS completas.', tag:'React · Node.js · Spring Boot' },
+  { icon:'📱', title:'Apps Móviles', desc:'Aplicaciones nativas y multiplataforma con Flutter. Un solo código, iOS y Android. UX de alto rendimiento, integración con APIs y Firebase.', tag:'Flutter · Firebase · REST API' },
+  { icon:'🖥️', title:'Desktop & Sistemas', desc:'Sistemas de escritorio robustos para empresas. ERP, CRM, sistemas de inventario o cualquier herramienta interna que tu empresa necesite.', tag:'Java · Flutter Desktop' },
+  { icon:'⚙️', title:'Backend & APIs', desc:'Arquitecturas escalables, microservicios, bases de datos optimizadas y APIs RESTful. La infraestructura que mantiene todo funcionando.', tag:'Spring Boot · MySQL · Firebase' },
+  { icon:'🤖', title:'Automatización con Python', desc:'Scrapers, bots, procesamiento de datos, scripts de automatización y flujos de trabajo que eliminan tareas repetitivas y ahorran horas de trabajo.', tag:'Python · Selenium · FastAPI' },
+  { icon:'☁️', title:'Soluciones Cloud', desc:'Integración con Firebase, arquitecturas serverless, autenticación segura, bases de datos en tiempo real y despliegue en la nube.', tag:'Firebase · Firestore · Cloud' },
+];
+
+function Services() {
+  const ref = useReveal();
+  return (
+    <section id="servicios" ref={ref} className="reveal">
+      <div className="section-label">02 — SERVICIOS</div>
+      <h2 className="section-title">Cualquier Proyecto,<br/>Cualquier Escala</h2>
+      <p className="section-desc">No importa el tamaño del desafío. Web, Mobile, Desktop, Backend o Automatización — construimos exactamente lo que tu negocio necesita.</p>
+      <div className="services-grid">
+        {SERVICES.map((s,i) => (
+          <div className="service-card" key={i}>
+            <div className="service-icon">{s.icon}</div>
+            <div className="service-title">{s.title}</div>
+            <div className="service-desc">{s.desc}</div>
+            <span className="service-tag">{s.tag}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---- LOANPRO ---- */
+function LoanPro() {
+  const ref = useReveal();
+  return (
+    <section id="loanpro" ref={ref} className="loanpro-section reveal">
+      <div className="loanpro-inner">
+        <div>
+          <div className="section-label">03 — PROYECTO DESTACADO</div>
+          <div className="loanpro-badge">🏦 Caso de Estudio Real</div>
+          <h2 className="loanpro-title"><span>LoanPro</span> — Sistema de Préstamos</h2>
+          <p className="loanpro-desc">
+            Un sistema financiero completo construido con Flutter y Firebase. Gestión de préstamos, cálculo de intereses, historial de pagos y reportes — todo en una sola plataforma segura y escalable.
+          </p>
+          <div className="loanpro-features">
+            {[
+              'Modo offline con sincronización automática al reconectarse',
+              'Base de datos en la nube con Firebase / Firestore en tiempo real',
+              'Autenticación segura y roles de usuario',
+              'Dashboard financiero con gráficas y métricas clave',
+              'Generación de reportes y estados de cuenta',
+              'Notificaciones de vencimiento y recordatorios automáticos',
+            ].map((f,i) => (
+              <div className="feature-row" key={i}>
+                <div className="dot"/>
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="loanpro-card">
+          <div style={{fontFamily:'var(--font-mono)',fontSize:'0.7rem',color:'var(--neon2)',letterSpacing:'1.5px',marginBottom:20}}>// MÉTRICAS DEL SISTEMA</div>
+          <div className="lp-stat-grid">
+            <div className="lp-stat"><span className="lp-stat-val">100%</span><span className="lp-stat-label">Offline ready</span></div>
+            <div className="lp-stat"><span className="lp-stat-val">⚡ Real</span><span className="lp-stat-label">time sync</span></div>
+            <div className="lp-stat"><span className="lp-stat-val">🔐</span><span className="lp-stat-label">Auth segura</span></div>
+            <div className="lp-stat"><span className="lp-stat-val">∞</span><span className="lp-stat-label">Escalable</span></div>
+          </div>
+          <div style={{marginBottom:12,fontFamily:'var(--font-mono)',fontSize:'0.65rem',color:'var(--muted)',letterSpacing:'1px'}}>STACK UTILIZADO</div>
+          <div className="lp-tech-row">
+            {['Flutter','Firebase','Firestore','Dart','Cloud Functions','Android','iOS'].map(t=>(
+              <span key={t} className="lp-tech">{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---- TEAM ---- */
+function Team() {
+  const ref = useReveal();
+  return (
+    <section id="equipo" ref={ref} className="team-section reveal">
+      <div className="section-label">04 — FUNDADORES</div>
+      <h2 className="section-title">Los ingenieros<br/>detrás del código</h2>
+      <p className="section-desc">Ingenieros de sistemas con una mentalidad clara: si puedes imaginarlo, podemos construirlo.</p>
+      <div className="team-grid">
+        <div className="team-card">
+          <div className="team-avatar">JG</div>
+          <div className="team-name">Joan Guerrero</div>
+          <div className="team-role">// CO-FOUNDER · FULL-STACK</div>
+          <div className="team-bio">Ingeniero de sistemas especializado en arquitecturas de software escalables. Flutter, Spring Boot y sistemas de alto rendimiento.</div>
+        </div>
+        <div className="team-card">
+          <div className="team-avatar" style={{background:'linear-gradient(135deg,#00c4f4,#00e5b0)'}}>LG</div>
+          <div className="team-name">Luis Genao</div>
+          <div className="team-role">// CO-FOUNDER · FULL-STACK</div>
+          <div className="team-bio">Ingeniero de sistemas con foco en backend robusto, automatización con Python y soluciones cloud empresariales.</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---- CONTACT MODAL ---- */
+function ContactModal({ open, onClose }) {
+  useEffect(() => {
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  if (!open) return null;
+  return (
+    <div
+      style={{position:'fixed',inset:0,zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}
+      onClick={onClose}
+    >
+      <div style={{position:'absolute',inset:0,background:'rgba(5,8,20,0.88)',backdropFilter:'blur(10px)'}}/>
+      <div
+        style={{position:'relative',background:'var(--card)',border:'1px solid var(--border)',borderRadius:20,padding:'40px 32px',maxWidth:560,width:'100%',zIndex:1,boxShadow:'0 40px 120px rgba(0,0,0,0.8)'}}
+        onClick={e=>e.stopPropagation()}
+      >
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+          <div style={{fontFamily:'var(--font-mono)',fontSize:'0.68rem',color:'var(--neon)',letterSpacing:'2px'}}>// CONTÁCTANOS</div>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'var(--muted)',fontSize:'1.3rem',cursor:'pointer',lineHeight:1}}>×</button>
+        </div>
+        <h2 style={{fontSize:'1.8rem',fontWeight:800,letterSpacing:'-1px',color:'#fff',marginBottom:8}}>¿Listo para construir algo increíble?</h2>
+        <p style={{color:'var(--muted)',fontSize:'0.88rem',marginBottom:28,lineHeight:1.7}}>Escríbenos por cualquier canal. Respondemos rápido.</p>
+
+        <div className="contact-cards">
+          {/* Instagram */}
+          <a className="contact-card instagram" href="https://instagram.com/dualcorestudio_" target="_blank" rel="noopener noreferrer">
+            <div className="contact-icon ig">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </div>
+            <div className="contact-label">Instagram</div>
+            <div className="contact-value">@dualcorestudio_</div>
+          </a>
+
+          {/* WhatsApp */}
+          <a className="contact-card whatsapp" href="https://wa.me/18297084911" target="_blank" rel="noopener noreferrer">
+            <div className="contact-icon wa">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+            </div>
+            <div className="contact-label">WhatsApp</div>
+            <div className="contact-value">829-708-4911</div>
+          </a>
+
+          {/* Email */}
+          <a className="contact-card email" href="mailto:dualcorestudio.devs@gmail.com">
+            <div className="contact-icon em" style={{fontSize:'1.5rem'}}>✉️</div>
+            <div className="contact-label">Correo</div>
+            <div className="contact-value">dualcorestudio.devs@gmail.com</div>
+          </a>
+
+          {/* Website */}
+          <a className="contact-card website" href="https://dictionary.cambridge.org/dictionary/english/actual" target="_blank" rel="noopener noreferrer">
+            <div className="contact-icon wb" style={{fontSize:'1.5rem'}}>🌐</div>
+            <div className="contact-label">Sitio Web</div>
+            <div className="contact-value">cambridge.org</div>
+          </a>
+        </div>
+
+        <div style={{marginTop:24,textAlign:'center',fontFamily:'var(--font-mono)',fontSize:'0.68rem',color:'var(--muted)'}}>
+          También: <a href="https://wa.me/18295347740" target="_blank" rel="noopener noreferrer" style={{color:'var(--neon)',textDecoration:'none'}}>829-534-7740</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---- FOOTER ---- */
+function Footer({ onContactClick }) {
+  return (
+    <footer>
+      <div className="footer-left">© 2025 <span>DualCore Studio</span> · Todos los derechos reservados</div>
+      <div className="footer-right" style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center'}}>
+        <a href="#servicios" style={{color:'var(--muted)',textDecoration:'none',transition:'color 0.2s'}} onMouseOver={e=>e.target.style.color='var(--neon)'} onMouseOut={e=>e.target.style.color='var(--muted)'}>Servicios</a>
+        <a href="#loanpro" style={{color:'var(--muted)',textDecoration:'none',transition:'color 0.2s'}} onMouseOver={e=>e.target.style.color='var(--neon)'} onMouseOut={e=>e.target.style.color='var(--muted)'}>Proyectos</a>
+        <a href="#contacto" style={{color:'var(--muted)',textDecoration:'none',transition:'color 0.2s'}} onClick={e=>{e.preventDefault();onContactClick();}} onMouseOver={e=>e.target.style.color='var(--neon)'} onMouseOut={e=>e.target.style.color='var(--muted)'}>Contacto</a>
+      </div>
+    </footer>
+  );
+}
+
+/* ---- APP ---- */
+function App() {
+  const [contactOpen, setContactOpen] = useState(false);
+  return (
+    <>
+      <Nav onContactClick={() => setContactOpen(true)} />
+      <Hero onContactClick={() => setContactOpen(true)} />
+      <div className="divider"/>
+      <Services />
+      <div className="divider"/>
+      <LoanPro />
+      <div className="divider"/>
+      <Team />
+      <div className="divider"/>
+      <Footer onContactClick={() => setContactOpen(true)} />
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
