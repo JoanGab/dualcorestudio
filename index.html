@@ -680,7 +680,8 @@ function DualCoreSVG({size=120}){
 /* ════ HERO ════ */
 const STACK=['Flutter','Spring Boot','React','Node.js','Python','Firebase','MySQL','Java'];
 function Hero({onContact,isAdmin}){
-  const[logo,setLogo]=useState(null);
+  // Usamos el nombre del archivo que subiste a GitHub
+  const[logo,setLogo]=useState('dualcore.jpeg');
   const fileRef=useRef();
 
   function handleLogo(e){
